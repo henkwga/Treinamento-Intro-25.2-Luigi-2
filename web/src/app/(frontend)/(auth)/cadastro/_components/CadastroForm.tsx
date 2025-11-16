@@ -1,27 +1,47 @@
-'use client'
+"use client";
+
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 import PasswordRequirement from "./PasswordRequirement";
 import RequiredTag from "@/components/base/input/RequiredTag";
-import { hasLowercase, hasMinLength, hasNumber, hasUppercase, validatePassword, validateConfirmPassword } from "@/utils";
+import {
+  hasLowercase,
+  hasMinLength,
+  hasNumber,
+  hasUppercase,
+  validatePassword,
+  validateConfirmPassword,
+} from "@/utils";
 
 import { toast } from "react-hot-toast";
-import { redirect } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const GoogleAuthButton = dynamic(() => import('@/components/auth/GoogleLoginButton'));
-const CredentialsButton = dynamic(() => import('@/components/auth/CredentialsButton'));
-const ValidatedInput = dynamic(() => import('@/components/base/input/ValidatedInput'));
+const GoogleAuthButton = dynamic(
+  () => import("@/components/auth/GoogleLoginButton"),
+);
+const CredentialsButton = dynamic(
+  () => import("@/components/auth/CredentialsButton"),
+);
+const ValidatedInput = dynamic(
+  () => import("@/components/base/input/ValidatedInput"),
+);
 
-function CadastroForm() {
+export default function CadastroForm() {
+  const router = useRouter();
+
   const [loading, setLoading] = useState(true);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
 
   const handleCredentialsSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,126 +66,139 @@ function CadastroForm() {
       });
 
       if (result.error) {
-        if (result.error.message?.includes('already exists') || result.error.message?.includes('duplicate')) {
+        if (
+          result.error.message?.includes("already exists") ||
+          result.error.message?.includes("duplicate")
+        ) {
           toast.error("Este email já está cadastrado");
         } else {
           toast.error(result.error.message || "Erro inesperado");
         }
       } else {
         toast.success(`Bem-vindo(a), ${name}!`);
-        
         setTimeout(() => {
-          redirect('/');
+          router.push("/");
         }, 1000);
       }
     } catch (error: unknown) {
-      console.error('Signup error:', error);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      console.error("Signup error:", error);
       toast.error((error as any).message ?? "Erro inesperado");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+  return (
+    <div className="text-left">
+      <GoogleAuthButton
+        disabled={loading}
+        text="Cadastrar com Google"
+      />
 
-  return ( 
-    <div className="flex items-center justify-center">
-      <div className="pt-6 mb-12 px-2">
-        <h2 className="font-bold text-[40px] text-center leading-12">Aprenda se divertindo!</h2>
-        <p className="text-gray-500 pt-1 mb-8">Lições, exercícios, simulações e muita interatividade customizados <b>da forma que você preferir</b></p>
-        
-        <GoogleAuthButton disabled={loading} text="Cadastro com Google" />
+      <div className="flex items-center gap-4 py-6">
+        <div className="flex-grow h-px bg-black/15" />
+        <span className="text-xs text-black/45 font-medium">ou</span>
+        <div className="flex-grow h-px bg-black/15" />
+      </div>
 
-        <div className="flex items-center gap-4 py-5">
-          <div className="flex-grow h-0.5 bg-gray-400" />
-          <p className="text-gray-400 text-lg">ou</p>
-          <div className="flex-grow h-0.5 bg-gray-400" />
+      <form onSubmit={handleCredentialsSubmit} className="space-y-4">
+        <ValidatedInput
+          title="Nome completo"
+          placeholder="Maria da Discoshop"
+          name="name"
+          type="text"
+          value={name}
+          setValue={setName}
+          required
+          labelClassName="text-sm font-semibold text-[#5c2a08]"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
+
+        <ValidatedInput
+          title="E-mail"
+          placeholder="seuemail@exemplo.com"
+          name="email"
+          type="email"
+          value={email}
+          setValue={setEmail}
+          required
+          labelClassName="text-sm font-semibold text-[#5c2a08]"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
+
+        <ValidatedInput
+          title="Senha"
+          placeholder="Crie uma senha"
+          name="password"
+          type="password"
+          value={password}
+          setValue={setPassword}
+          overrideValidate={validatePassword}
+          required
+          labelClassName="text-sm font-semibold text-[#5c2a08]"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
+
+        <ValidatedInput
+          title="Confirmar senha"
+          placeholder="Repita a senha"
+          name="confirmPassword"
+          type="password"
+          dependencies={[password]}
+          value={confirmPassword}
+          setValue={setConfirmPassword}
+          overrideValidate={(val) =>
+            validateConfirmPassword(val, password)
+          }
+          required
+          labelClassName="text-sm font-semibold text-[#5c2a08]"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
+
+        <div className="mt-1 text-xs text-black/70 space-y-1">
+          <p className="font-semibold">Sua senha deve ter pelo menos:</p>
+          <PasswordRequirement
+            text="1 letra maiúscula"
+            validateFunction={() => hasUppercase(password)}
+          />
+          <PasswordRequirement
+            text="1 letra minúscula"
+            validateFunction={() => hasLowercase(password)}
+          />
+          <PasswordRequirement
+            text="1 número"
+            validateFunction={() => hasNumber(password)}
+          />
+          <PasswordRequirement
+            text="8 caracteres"
+            validateFunction={() => hasMinLength(password)}
+          />
         </div>
 
-        <form className="" onSubmit={handleCredentialsSubmit}>
-          <div className="flex flex-col gap-4">
-            <ValidatedInput
-              title="Nome"
-              placeholder="Vagalume da Silva"
-              name="name"
-              type="text"
-              value={name}
-              setValue={setName}
-              labelClassName='auth-label'
-              inputClassName='auth-input'
-              iconContainerClassName="auth-icon"
-              required
-            ><RequiredTag/></ValidatedInput>
-            <ValidatedInput
-              title="E-mail"
-              placeholder="exemplo@noctiluz.com.br"
-              name="email"
-              type="email"
-              value={email}
-              setValue={setEmail}
-              labelClassName='auth-label'
-              inputClassName='auth-input'
-              iconContainerClassName="auth-icon"
-              required
-            ><RequiredTag/></ValidatedInput>
-            <ValidatedInput
-              title="Senha"
-              placeholder="Insira sua senha"
-              name="password"
-              type="password"
-              value={password}
-              setValue={setPassword}
-              overrideValidate={validatePassword}
-              labelClassName="auth-label"
-              inputClassName="auth-input"
-              iconContainerClassName="auth-icon"
-              required
-            ><RequiredTag/></ValidatedInput>
-            <ValidatedInput
-              title="Confirmar Senha"
-              placeholder="Confirme sua senha"
-              name="confirmPassword"
-              type="password"
-              dependencies={[password]}
-              value={confirmPassword}
-              setValue={setConfirmPassword}
-              overrideValidate={(val) => validateConfirmPassword(val, password)}
-              labelClassName="auth-label"
-              inputClassName="auth-input"
-              iconContainerClassName="auth-icon"
-              required
-            ><RequiredTag/></ValidatedInput>
-            <p>
-              Senha deve ter pelo menos:
-              
-              <PasswordRequirement 
-                text="1 letra maiúscula"
-                validateFunction={() => hasUppercase(password)}
-              />
-              <PasswordRequirement 
-                text="1 letra minúscula"
-                validateFunction={() => hasLowercase(password)}
-              />
-              <PasswordRequirement 
-                text="1 número"
-                validateFunction={() => hasNumber(password)}
-              />
-              <PasswordRequirement 
-                text="8 caracteres"
-                validateFunction={() => hasMinLength(password)}
-              />
-            </p>
-          </div>
-          <CredentialsButton disabled={loading} className="mt-6">Cadastro</CredentialsButton>
-        </form>
-        
-        <Link href='/login' className="block w-fit mt-8 text-sm group">Já tem uma conta? <span className="text-pink-500 colorTransition border-b border-transparent group-hover:border-pink-500">Login</span></Link>
+        <CredentialsButton
+          disabled={loading}
+          className="mt-4 w-full rounded-full bg-[#ffd100] hover:bg-[#ffcc00] px-6 py-3 text-sm font-semibold text-black shadow-md transition disabled:opacity-60"
+        >
+          Cadastrar
+        </CredentialsButton>
+      </form>
+
+      <div className="mt-6 text-center text-sm">
+        <Link
+          href="/login"
+          className="text-[#5c2a08] hover:text-black underline underline-offset-4 transition"
+        >
+          Já tem uma conta? Faça login
+        </Link>
       </div>
     </div>
-   );
+  );
 }
-
-export default CadastroForm;

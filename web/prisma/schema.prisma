@@ -14,70 +14,84 @@ enum Role {
   SUPER_ADMIN
 }
 
-// modelos de exemplo abaixo (pode deletar)
-model Curso {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  name      String
-  descricao String
-  slug      String @unique
+enum StatusCompra {
+  pending    @map("PENDENTE")
+  paid       @map("PAGO")
+  shipped    @map("ENVIADO")
+  delivered  @map("ENTREGUE")
+  cancelled  @map("CANCELADO")
 
-  materiasRelacionadas CursoMateriaRelacionada[]
+  @@map("StatusCompra")
 }
-
-model CursoMateriaRelacionada {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-
-  curso   Curso  @relation(fields: [cursoId], references: [id])
-  cursoId String
-
-  materia   Materia @relation(fields: [materiaId], references: [id])
-  materiaId String
-
-  @@unique([cursoId, materiaId])
-}
-
-model Materia {
-  id                 String                    @id @default(uuid()) @map("_id")
-  name               String
-  descricao          String
-  cor                String
-  slug               String                    @unique
-  cursosRelacionados CursoMateriaRelacionada[]
-}
-
-model Licao {
-  id        String   @id @default(auto()) @map("_id") @db.ObjectId // id base do mongodb, + perfomance
-  name      String
-  descricao String
-  archived  Boolean? @default(false)
-}
-// modelos de exemplo acima (pode deletar)
 
 model User {
-  // nao mexer entre aqui >
-  id            String    @id @map("_id") // o id do user deve ser assim por causa do better auth
+  // nao mexer >
+  id            String   @id @default(uuid()) @map("_id")
   name          String
-  email         String    @unique
+  email         String   @unique
   emailVerified Boolean?
   image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  sessions      Session[]
-  accounts      Account[]
-  role          Role      @default(USER)
-  // < e aqui
+  role          Role     @default(USER)
+  // < nao mexer
 
-
+  createdAt DateTime
+  updatedAt DateTime
+  sessions  Session[]
+  accounts  Account[]
 
   @@map("user")
 }
 
+model Produto {
+  id          String             @id @default(uuid()) @map("_id")
+  nome        String
+  descricao   String?
+  preco       Float
+  cover       String
+  categoryRaw String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  categorias  ProdutoCategoria[]
+  itens       CompraItem[]
+}
 
+model Categoria {
+  id        String             @id @default(uuid()) @map("_id")
+  nome      String             @unique
+  slug      String             @unique
+  createdAt DateTime           @default(now())
+  produtos  ProdutoCategoria[]
+}
 
+model ProdutoCategoria {
+  id          String    @id @default(uuid()) @map("_id")
+  produtoId   String
+  categoriaId String
+  produto     Produto   @relation(fields: [produtoId], references: [id])
+  categoria   Categoria @relation(fields: [categoriaId], references: [id])
 
+  @@unique([produtoId, categoriaId])
+}
 
-// evitar mexer daqui pra baixo
-// nesses 3 modelos do better auth
+model Compra {
+  id         String       @id @default(uuid()) @map("_id")
+  userId     String
+  status     StatusCompra @default(pending)
+  precoTotal Float
+  createdAt  DateTime     @default(now())
+  itens      CompraItem[]
+}
+
+model CompraItem {
+  id         String  @id @default(uuid()) @map("_id")
+  compraId   String
+  produtoId  String
+  quantidade Int
+  precoUnit  Float
+  compra     Compra  @relation(fields: [compraId], references: [id])
+  produto    Produto @relation(fields: [produtoId], references: [id])
+}
+
 model Session {
   id        String   @id @map("_id")
   expiresAt DateTime

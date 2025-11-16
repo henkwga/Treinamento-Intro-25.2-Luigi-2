@@ -1,0 +1,17 @@
+meta {
+  name: category
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/{{folder}}
+  body: none
+  auth: inherit
+  headers { Content-Type: application/json }
+  params {
+    category: rock 
+  }
+}
+
+

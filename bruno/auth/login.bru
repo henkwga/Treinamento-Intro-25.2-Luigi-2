@@ -5,15 +5,15 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/auth/sign-in/email
+  url: {{baseUrl}}/api/auth/sign-in/email
   body: json
   auth: inherit
 }
 
 body:json {
   {
-    "email": "daniela63@yahoo.com", 
-    "password": "Teste123", 
+    "email": "luigi.rigoletto@usp.br", 
+    "password": "Luigifr123", 
     "callbackURL": "/"
   }
 }

@@ -1,0 +1,20 @@
+meta {
+  name: delete
+  type: http
+  seq: 4
+}
+
+delete {
+  url: {{baseUrl}}/api/products
+  body: none
+  auth: inherit
+  headers { Content-Type: application/json }
+}
+
+tests {
+  expect res.status toBeOneOf [200,204]
+}
+
+settings {
+  encodeUrl: true
+}

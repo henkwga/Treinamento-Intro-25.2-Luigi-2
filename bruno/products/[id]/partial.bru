@@ -1,0 +1,23 @@
+meta {
+  name: partial
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: inherit
+  headers { Content-Type: application/json }
+}
+
+body:json {
+  {
+    "preco": 159.9
+  }
+}
+
+tests {
+  expect res.status toBe 200
+  expect body.preco toBe 159.9
+}

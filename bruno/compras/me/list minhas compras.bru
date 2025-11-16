@@ -1,0 +1,20 @@
+meta {
+  name: list minhas compras
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/compras/me
+  body: none
+  auth: inherit
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

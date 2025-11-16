@@ -1,0 +1,27 @@
+meta {
+  name: update
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{baseUrl}}/api/products
+  body: json
+  auth: inherit
+  headers { Content-Type: application/json }
+}
+
+body:json {
+  {
+    "nome": "Título Atualizado",
+    "descricao": "Texto atualizado",
+    "preco": 249.9,
+    "cover": "/covers/novo.jpg",
+    "categoriaIds": []
+  }
+}
+
+tests {
+  expect res.status toBe 200
+  expect body.nome toBe "Título Atualizado"
+}

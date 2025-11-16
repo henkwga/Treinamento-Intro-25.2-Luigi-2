@@ -1,0 +1,24 @@
+meta {
+  name: compras status
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/compras/status?userId=egHTX6i1mUITwOXikeu3OYYT789Mx2HE
+  body: none
+  auth: inherit
+}
+
+params:query {
+  userId: egHTX6i1mUITwOXikeu3OYYT789Mx2HE
+}
+
+headers {
+  Content-Type: application/json
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

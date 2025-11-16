@@ -5,13 +5,22 @@ meta {
 }
 
 patch {
-  url: {{baseUrl}}/{{folder}}/{{userId}}/email
+  url: {{baseUrl}}/api/users/{{userId}}/email
   body: json
   auth: inherit
+  headers {
+    Content-Type: application/json
+    Authorization: Bearer {{token}}
+  }
 }
 
 body:json {
   {
-    "email": "mengao@campeao.com"
+    "email": "palmeiras@gigante.com"
   }
+}
+
+tests {
+  expect res.status toBe 200
+  expect res.body.email toBe "palmeiras@gigante.com"
 }

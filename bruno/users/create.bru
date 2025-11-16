@@ -8,21 +8,33 @@ post {
   url: {{baseUrl}}/{{folder}}
   body: json
   auth: inherit
+  headers {
+    Content-Type: application/json
+    // Authorization: Bearer {{token}} 
+  }
 }
 
 body:json {
   {
     "name": "{{$randomFullName}}",
-    "email": "{{$randomEmail}}",
+    "email": "user+{{$timestamp}}@example.com",
     "password": "Teste123",
     "confirmPassword": "Teste123"
   }
 }
 
+tests {
+  expect res.status toBe 201
+  expect body.message toBe "Usuário criado com sucesso"
+  expect body.user.id toBeDefined
+}
+
 script:post-response {
-  if (res.body && res.body.id) {
-    bru.setVar("userId", res.body.id);
+  // guarda dados para as próximas rotas ([id], update, delete, etc.)
+  if (res.body && res.body.user && res.body.user.id) {
+    bru.setVar("userId", res.body.user.id);
+    bru.setVar("userEmail", res.body.user.email);
   } else {
-    console.log("No ID found in response");
+    console.log("No user.id found in response");
   }
 }

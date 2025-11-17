@@ -1,4 +1,3 @@
-// app/(frontend)/(public-store)/catalogo/_components/CatalogPage.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -28,10 +27,17 @@ type Album = {
   description?: string;
 };
 
-export default function CatalogPage() {
+type CatalogPageProps = {
+  isLogged: boolean;
+  userEmail: string | null;
+};
+
+export default function CatalogPage({ isLogged, userEmail }: CatalogPageProps) {
   const search = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const ownerId = isLogged && userEmail ? userEmail : null;
+
 
   const [category, setCategory] = useState<string>(
     (search.get("cat") || "all").toLowerCase()
@@ -39,12 +45,10 @@ export default function CatalogPage() {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Atualiza categoria quando muda a URL (?cat=)
   useEffect(() => {
     setCategory((search.get("cat") || "all").toLowerCase());
   }, [search]);
 
-  // Busca produtos sempre que a categoria muda
   useEffect(() => {
     const url =
       category === "all"
@@ -73,7 +77,6 @@ export default function CatalogPage() {
       .finally(() => setLoading(false));
   }, [category]);
 
-  // Lista de categorias para os filtros
   const cats = useMemo(() => {
     const set = new Set<string>();
     for (const a of albums) set.add(a.category);
@@ -98,15 +101,13 @@ export default function CatalogPage() {
           </p>
         </header>
 
-        {/* Filtros de categoria */}
         <div className="mb-10 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => handleCat("all")}
-            className={`rounded-full border border-[#232323] px-4 py-1 text-sm ${
-              category === "all"
-                ? "bg-[#ffd100] text-black"
-                : "bg-white/5 text-white hover:bg-white/10"
-            }`}
+            className={`rounded-full border border-[#232323] px-4 py-1 text-sm ${category === "all"
+              ? "bg-[#ffd100] text-black"
+              : "bg-white/5 text-white hover:bg-white/10"
+              }`}
           >
             Todos
           </button>
@@ -115,24 +116,26 @@ export default function CatalogPage() {
             <button
               key={slug}
               onClick={() => handleCat(slug)}
-              className={`rounded-full border border-[#232323] px-4 py-1 text-sm capitalize ${
-                category === slug
-                  ? "bg-[#ffd100] text-black"
-                  : "bg-white/5 text-white hover:bg-white/10"
-              }`}
+              className={`rounded-full border border-[#232323] px-4 py-1 text-sm capitalize ${category === slug
+                ? "bg-[#ffd100] text-black"
+                : "bg-white/5 text-white hover:bg-white/10"
+                }`}
             >
               {slug.replace(/-/g, " ")}
             </button>
           ))}
         </div>
 
-        {/* Lista / loading */}
         {loading ? (
           <p className="text-center text-gray-400">Carregando...</p>
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-            {albums.map((a) => (
-              <AlbumCard key={a.id} album={a} />
+            {albums.map((album) => (
+              <AlbumCard
+                key={album.id}
+                album={album}
+                ownerId={ownerId}
+              />
             ))}
           </div>
         )}

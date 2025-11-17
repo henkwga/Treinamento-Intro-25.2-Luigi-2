@@ -9,8 +9,8 @@ const rubik = Rubik({
 })
 
 export const metadata: Metadata = {
-  title: "Noctiluz",
-  description: "Plataforma para olimpíadas científicas e reforço escolar",
+  title: "DISCOSHOP",
+  description: "E-Commerce de disco de vinil",
 };
 
 export default function RootLayout({

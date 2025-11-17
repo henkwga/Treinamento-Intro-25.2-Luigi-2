@@ -1,21 +1,22 @@
-// app/(frontend)/(public-store)/catalogo/page.tsx
+// src/app/(frontend)/(public-store)/catalogo/page.tsx
 import { headers } from "next/headers";
 import { auth } from "@/auth";
-import InitialNav from "@/components/base/nav/InitialNav";
 import CatalogPage from "./_components/CatalogPage";
+import LandingPagesNav from "@/components/base/nav/InitialNav";
 
 export default async function CatalogoPage() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
 
-  const isLogged = !!session?.user;
-  const userName = session?.user?.name ?? null;
+  const user = session?.user ?? null;
+  const isLogged = !!user;
+  const userEmail = user?.email ?? null;
 
   return (
-    <div className="min-h-screen bg-[#0e0f11]">
-      <InitialNav isLogged={isLogged} userName={userName} />
-      <CatalogPage />
-    </div>
+    <>
+      <LandingPagesNav isLogged={isLogged} />
+      <CatalogPage isLogged={isLogged} userEmail={userEmail} />
+    </>
   );
 }

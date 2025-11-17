@@ -1,29 +1,25 @@
-'use client'
+"use client";
+
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
-import LoginOptionals from "@/components/auth/LoginOptionals";
-
-import RequiredTag from "@/components/base/input/RequiredTag";
-import { authClient } from "@/lib/auth-client";
+import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
-import dynamic from 'next/dynamic';
+const GoogleAuthButton = dynamic(() => import("@/components/auth/GoogleLoginButton"));
+const CredentialsButton = dynamic(() => import("@/components/auth/CredentialsButton"));
+const ValidatedInput = dynamic(() => import("@/components/base/input/ValidatedInput"));
+import RequiredTag from "@/components/base/input/RequiredTag";
 
-const GoogleAuthButton = dynamic(() => import('@/components/auth/GoogleLoginButton'));
-const CredentialsButton = dynamic(() => import('@/components/auth/CredentialsButton'));
-const ValidatedInput = dynamic(() => import('@/components/base/input/ValidatedInput'));
-
-function LoginForm() {
+export default function LoginForm() {
   const [loading, setLoading] = useState(true);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  useEffect(() => {
-    setLoading(false);
-  }, []);
+  useEffect(() => setLoading(false), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
 
@@ -35,65 +31,74 @@ function LoginForm() {
       });
 
       if (result.error) {
-        toast.error((result.error?.message || 'Erro desconhecido'))
+        toast.error(result.error?.message || "Erro desconhecido");
       }
     } catch (error) {
-      toast.error('Erro: ' + String(error))
+      toast.error("Erro: " + String(error));
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  return ( 
-    <div className="lg:w-[90%] xl:w-[80%]">
-      <h2 className="font-bold text-[40px] text-center leading-12">Continue seu aprendizado</h2>
-      <form className="mt-6" onSubmit={handleSubmit}>
-        <ValidatedInput 
+  return (
+    <div className="text-left">
+
+      <form onSubmit={handleSubmit} className="space-y-5">
+
+        <ValidatedInput
           title="E-mail"
-          placeholder="exemplo@noctiluz.com.br"
+          placeholder="seuemail@exemplo.com"
           name="email"
           type="email"
           value={email}
           setValue={setEmail}
-          labelClassName='auth-label'
-          inputClassName='auth-input'
-          iconContainerClassName="auth-icon"
           required
-        ><RequiredTag/></ValidatedInput>
-        
-        <ValidatedInput 
+          labelClassName="text-sm font-semibold text-black/80"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
+
+        <ValidatedInput
           title="Senha"
-          placeholder="Insira sua senha"
+          placeholder="••••••••"
           name="password"
           type="password"
           value={password}
           setValue={setPassword}
-
-          overrideValidate={(val) => val.length >= 6}
-
-          containerClassName="mt-4"
-          labelClassName="auth-label"
-          inputClassName="auth-input"
-          iconContainerClassName="auth-icon"
+          overrideValidate={(v) => v.length >= 6}
           required
-        ><RequiredTag/></ValidatedInput>
+          labelClassName="text-sm font-semibold text-black/80"
+          inputClassName="w-full rounded-xl bg-white/70 border border-black/10 px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-black/20 shadow-sm"
+        >
+          <RequiredTag />
+        </ValidatedInput>
 
-        <LoginOptionals />
-
-        <CredentialsButton className="mt-6" disabled={loading}>Entrar</CredentialsButton>
+        <CredentialsButton
+          disabled={loading}
+          className="w-full rounded-full bg-[#ffd100] hover:bg-[#ffcc00] px-6 py-3 text-sm font-semibold text-black shadow-md transition"
+        >
+          Entrar
+        </CredentialsButton>
       </form>
-      
-      <div className="flex items-center gap-4 py-5">
-        <div className="flex-grow h-0.5 bg-gray-400" />
-        <p className="text-gray-400 text-lg">ou</p>
-        <div className="flex-grow h-0.5 bg-gray-400" />
+
+      <div className="flex items-center gap-4 my-8">
+        <div className="flex-grow h-px bg-black/20" />
+        <span className="text-black/40 text-xs font-medium">ou</span>
+        <div className="flex-grow h-px bg-black/20" />
       </div>
 
-      <GoogleAuthButton disabled={loading} text="Entrar com Google" />
+      <GoogleAuthButton
+        disabled={loading}
+        text="Entrar com Google"
+      />
 
-      <Link href='/cadastro' className="block w-fit mt-8 text-sm group">Ainda não tem uma conta? <span className="text-pink-500 colorTransition border-b border-transparent group-hover:border-pink-500">Cadastre-se</span></Link>
+      <Link
+        href="/cadastro"
+        className="block text-center mt-6 text-sm text-black/70 hover:text-black underline underline-offset-4 transition"
+      >
+        Ainda não tem uma conta? Cadastre-se
+      </Link>
     </div>
-   );
+  );
 }
-
-export default LoginForm;

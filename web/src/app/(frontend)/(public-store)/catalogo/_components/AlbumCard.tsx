@@ -28,7 +28,7 @@ export default function AlbumCard({ album, ownerId }: AlbumCardProps) {
     console.log("=== ADICIONAR AO CARRINHO ===");
     console.log("ownerId recebido:", ownerId);
 
-    let cart = readCart(ownerId);
+    const cart = readCart(ownerId);
     console.log("Carrinho ANTES:", cart);
 
     const existing = cart.find((i) => i.id === album.id);

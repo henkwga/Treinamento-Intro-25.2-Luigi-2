@@ -3,8 +3,10 @@
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 
+type Session = Awaited<ReturnType<typeof authClient.getSession>>;
+
 export function useSession() {
-  const [session, setSession] = useState<any>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   async function loadSession() {
@@ -20,13 +22,13 @@ export function useSession() {
   }
 
   useEffect(() => {
-    loadSession(); // apenas carrega — sem listener
+    loadSession();
   }, []);
 
   return {
     session,
     user: session?.user ?? null,
     loading,
-    refresh: loadSession, // permite recarregar quando você quiser
+    refresh: loadSession,
   };
 }

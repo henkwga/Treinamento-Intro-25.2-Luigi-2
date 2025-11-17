@@ -2,9 +2,14 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { normalizeCoverPath } from "@/utils/image";
+import {readCart, writeCart, getCartKey, type CartLine} from "@/utils/cart";
 
-type CartLine = { id: string; qty: number };
-type ProdutoFromAPI = { id: string; nome: string; preco: number; cover: string };
+type ProdutoFromAPI = {
+  id: string;
+  nome: string;
+  preco: number;
+  cover: string;
+};
 
 type CartItem = {
   id: string;
@@ -17,45 +22,41 @@ type CartItem = {
 
 type CartPageProps = {
   isLogged: boolean;
+  userEmail?: string | null;
 };
 
-const LS_KEY = "cart";
 const toBRL = (v: number) =>
   new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: "BRL",
   }).format(v);
 
-function readCart(): CartLine[] {
-  try {
-    return JSON.parse(localStorage.getItem(LS_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
+export default function CartPage({ isLogged, userEmail }: CartPageProps) {
+  // se estiver logado e tiver email, usa o carrinho da conta; senão, guest
+  const ownerId: string | null = isLogged && userEmail ? userEmail : null;
 
-function writeCart(lines: CartLine[]) {
-  localStorage.setItem(LS_KEY, JSON.stringify(lines));
-}
-
-export default function CartPage({ isLogged }: CartPageProps) {
   const [lines, setLines] = useState<CartLine[]>([]);
   const [products, setProducts] = useState<Record<string, ProdutoFromAPI>>({});
   const [loading, setLoading] = useState(false);
 
-  // lê carrinho do localStorage e escuta mudanças em outras abas
+  // carregar carrinho certo quando trocar de "dono" (guest ↔ usuário)
   useEffect(() => {
-    setLines(readCart());
+    const current = readCart(ownerId);
+    setLines(current);
+
+    const storageKey = getCartKey(ownerId);
 
     const onStorage = (e: StorageEvent) => {
-      if (e.key === LS_KEY) setLines(readCart());
+      if (e.key === storageKey) {
+        setLines(readCart(ownerId));
+      }
     };
 
     window.addEventListener("storage", onStorage);
     return () => window.removeEventListener("storage", onStorage);
-  }, []);
+  }, [ownerId]);
 
-  // busca detalhes dos produtos do carrinho
+  // buscar produtos do backend sempre que linhas mudarem
   useEffect(() => {
     const ids = lines.map((l) => l.id);
     if (!ids.length) {
@@ -102,7 +103,7 @@ export default function CartPage({ isLogged }: CartPageProps) {
     if (qty < 1) return;
     const next = lines.map((l) => (l.id === id ? { ...l, qty } : l));
     setLines(next);
-    writeCart(next);
+    writeCart(next, ownerId);
   }
 
   function inc(id: string) {
@@ -119,12 +120,12 @@ export default function CartPage({ isLogged }: CartPageProps) {
   function removeLine(id: string) {
     const next = lines.filter((l) => l.id !== id);
     setLines(next);
-    writeCart(next);
+    writeCart(next, ownerId);
   }
 
   function clearCart() {
     setLines([]);
-    writeCart([]);
+    writeCart([], ownerId);
   }
 
   async function checkout() {

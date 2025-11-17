@@ -3,7 +3,7 @@ import DiscoshopBackground from "./DiscoshopBackground";
 
 export default function DiscoshopHero() {
   return (
-    <section className="relative flex min-h-[calc(100vh-5rem)] w-full items-center justify-center overflow-hidden overscroll-y-none pt-20">
+    <section className="relative flex min-h-screen w-full items-center justify-center overflow-hidden overscroll-y-none pt-20">
       <DiscoshopBackground />
 
       <div className="mx-auto flex max-w-6xl flex-col items-center px-4 text-center">

@@ -82,10 +82,17 @@ export default function CadastroForm() {
       }
     } catch (error: unknown) {
       console.error("Signup error:", error);
-      toast.error((error as any).message ?? "Erro inesperado");
+
+      const message =
+        error instanceof Error && error.message
+          ? error.message
+          : "Erro inesperado";
+
+      toast.error(message);
     } finally {
       setLoading(false);
     }
+
   };
 
   return (

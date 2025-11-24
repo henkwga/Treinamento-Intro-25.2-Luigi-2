@@ -4,12 +4,16 @@ import { productCreateSchema } from "../../schemas/product";
 import { handleError } from "@/utils/http";
 import { authMiddleware } from "@/middleware/auth";
 
+type ProdutoWhereInput = NonNullable<
+  Parameters<(typeof prisma)["produto"]["findMany"]>[0]
+>["where"];
+
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const category = searchParams.get("category");
 
-    const where: any = {};
+    const where: ProdutoWhereInput = {};
 
     if (category && category !== "all") {
       where.categorias = {
@@ -35,9 +39,7 @@ export async function GET(req: NextRequest) {
       where,
       include: {
         categorias: {
-          include: {
-            categoria: true,
-          },
+          include: { categoria: true },
         },
       },
       orderBy: { nome: "asc" },
@@ -54,7 +56,6 @@ export async function POST(req: NextRequest) {
   if (authResult instanceof NextResponse) {
     return authResult;
   }
-
 
   try {
     const body = await req.json();

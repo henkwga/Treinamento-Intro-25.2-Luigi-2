@@ -4,6 +4,51 @@ import { productCreateSchema } from "../../schemas/product";
 import { handleError } from "@/utils/http";
 import { authMiddleware } from "@/middleware/auth";
 
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const category = searchParams.get("category");
+
+    const where: any = {};
+
+    if (category && category !== "all") {
+      where.categorias = {
+        some: {
+          categoria: {
+            is: {
+              OR: [
+                { slug: category },
+                {
+                  nome: {
+                    equals: category,
+                    mode: "insensitive",
+                  },
+                },
+              ],
+            },
+          },
+        },
+      };
+    }
+
+    const produtos = await prisma.produto.findMany({
+      where,
+      include: {
+        categorias: {
+          include: {
+            categoria: true,
+          },
+        },
+      },
+      orderBy: { nome: "asc" },
+    });
+
+    return NextResponse.json(produtos, { status: 200 });
+  } catch (error) {
+    return handleError(error, "listar produtos");
+  }
+}
+
 export async function POST(req: NextRequest) {
   const authResult = await authMiddleware(req);
   if (authResult instanceof NextResponse) {
